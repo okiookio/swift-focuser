@@ -23,8 +23,21 @@ public struct FocusModifier<Value: FocusStateCompliant & Hashable>: ViewModifier
     @State var observer = TextFieldObserver()
     
     public func body(content: Content) -> some View {
+        let configToolBar: (UITextField) -> Void = { textField in
+            let doneToolbar: UIToolbar = UIToolbar(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
+            doneToolbar.barStyle = .default
+            let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: .done, target: nil, action: nil)
+            doneToolbar.items = [flexSpace, done]
+            doneToolbar.sizeToFit()
+            textField.inputAccessoryView = doneToolbar
+            done.target = textField
+            done.action = #selector( textField.resignFirstResponder )
+        }
+        
         content
             .introspectTextField { tf in
+                configToolBar(tf)
                 tf.delegate = observer
                 
                 /// when user taps return we navigate to next responder
